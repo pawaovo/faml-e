@@ -139,23 +139,31 @@ async function callGeminiStream(
   userMessage: string
 ) {
   // 构建 Gemini API 请求格式
-  const contents = [
-    {
-      role: "user",
-      parts: [{ text: systemPrompt }],
-    },
-    ...history.map((msg) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
-    })),
-    {
-      role: "user",
-      parts: [{ text: userMessage }],
-    },
-  ];
+  // 将系统提示合并到第一条用户消息中
+  const firstUserMessage = history.length === 0
+    ? `${systemPrompt}\n\n${userMessage}`
+    : userMessage;
+
+  const contents = history.length === 0
+    ? [
+        {
+          role: "user",
+          parts: [{ text: firstUserMessage }],
+        },
+      ]
+    : [
+        ...history.map((msg) => ({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text: msg.content }],
+        })),
+        {
+          role: "user",
+          parts: [{ text: userMessage }],
+        },
+      ];
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?key=${geminiApiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${geminiApiKey}`,
     {
       method: "POST",
       headers: {
@@ -163,6 +171,9 @@ async function callGeminiStream(
       },
       body: JSON.stringify({
         contents,
+        systemInstruction: {
+          parts: [{ text: systemPrompt }],
+        },
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 2048,
@@ -172,6 +183,8 @@ async function callGeminiStream(
   );
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Gemini API error:", response.status, errorText);
     throw new Error(`Gemini API error: ${response.status}`);
   }
 
