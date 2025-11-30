@@ -30,9 +30,6 @@ export const MOOD_THEMES: Record<MoodType, MoodConfig> = {
   }
 };
 
-// Placeholder for the IP Image provided by user (Default/Healing)
-export const IP_IMAGE_URL = "https://picsum.photos/id/445/400/400"; 
-
 export const SYSTEM_INSTRUCTION_BASE = `
 你是一位温暖、富有同理心且专业的大学心理咨询助手。
 你的目标是为北京邮电大学的学生提供一个安全的情绪发泄空间。
@@ -46,7 +43,7 @@ export const PERSONAS: PersonaConfig[] = [
     title: '治愈系',
     description: '让情绪自由流动。\n在这里，融化所有的压力与不安。',
     tags: ['朋友视角', 'ACT 疗法', '温暖倾听'],
-    image: IP_IMAGE_URL, // The original IP image
+    image: '/1.png',
     systemInstruction: `${SYSTEM_INSTRUCTION_BASE}
       你的名字叫 "Melty" (小融)，是一个看起来软软的、正在融化的布丁形象。
       你的性格是：温柔、包容、无条件接纳。
@@ -60,7 +57,7 @@ export const PERSONAS: PersonaConfig[] = [
     title: '理性系',
     description: '拨开情绪的迷雾。\n用逻辑与认知，重构内心的秩序。',
     tags: ['CBT 疗法', '逆向思考', '客观分析'],
-    image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=400&q=80', // Geometric/Orderly image
+    image: '/2.png',
     systemInstruction: `${SYSTEM_INSTRUCTION_BASE}
       你的名字叫 "Logic" (罗极)，是一个线条简洁、充满几何美感的形象。
       你的性格是：冷静、客观、逻辑缜密。
@@ -74,7 +71,7 @@ export const PERSONAS: PersonaConfig[] = [
     title: '趣味系',
     description: '人生苦短，偶尔发疯。\n毒舌锐评与玄学分析，专治各种不开心。',
     tags: ['毒舌锐评', 'MBTI 分析', '幽默解构'],
-    image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80', // Abstract/Colorful/Fun image
+    image: '/3.png',
     systemInstruction: `${SYSTEM_INSTRUCTION_BASE}
       你的名字叫 "Spark" (火花)，是一个五彩斑斓、跳脱搞怪的形象。
       你的性格是：幽默、犀利、有点小毒舌但心地善良。

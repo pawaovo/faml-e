@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { IP_IMAGE_URL } from '../constants';
 import { Settings, Shield, Activity, ChevronRight, LogOut, Moon } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
@@ -10,7 +9,7 @@ export const ProfilePage: React.FC = () => {
       {/* User Profile Card - Apple ID Style */}
       <div className="bg-white/40 backdrop-blur-xl border border-white/50 p-5 rounded-[2rem] flex items-center gap-4 mb-6 shadow-sm">
         <div className="w-16 h-16 rounded-full bg-white p-1 shadow-sm flex-shrink-0">
-             <img src={IP_IMAGE_URL} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+             <img src="/1.png" alt="Avatar" className="w-full h-full rounded-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-gray-900 truncate">北邮同学</h3>
