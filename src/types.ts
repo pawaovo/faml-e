@@ -21,6 +21,24 @@ export interface ChatMessage {
   isTools?: boolean;
 }
 
+// 数据库聊天会话类型
+export interface ChatSession {
+  id: string;
+  user_id: string;
+  persona: string;
+  created_at: string;
+}
+
+// 数据库聊天消息类型（与上面的 ChatMessage 区分）
+export interface ChatMessageDB {
+  id: string;
+  session_id: string;
+  role: 'user' | 'model';
+  content: string;
+  mood_detected?: string | null;
+  created_at: string;
+}
+
 export interface JournalEntry {
   id: string;
   content: string;
