@@ -11,73 +11,10 @@ import { MoodType, JournalEntry, PersonaConfig } from './types';
 import { Home, Calendar as CalendarIcon, ClipboardList, Megaphone, User } from 'lucide-react';
 import { PERSONAS } from './constants';
 
-const generateMockEntries = (): JournalEntry[] => {
-  const today = new Date();
-  const subDays = (d: number) => {
-    const date = new Date(today);
-    date.setDate(date.getDate() - d);
-    return date.toISOString();
-  };
-
-  return [
-    {
-      id: 'mock-1',
-      date: subDays(1), // Yesterday
-      mood: MoodType.ANXIOUS,
-      content: '明天的Pre还没准备好，PPT还有几页没改完，感觉时间不够用了。有点焦虑，希望能顺利过关。',
-      summary: '面对截止日期的压力，感到一丝焦虑。'
-    },
-    {
-      id: 'mock-2',
-      date: subDays(3),
-      mood: MoodType.HAPPY,
-      content: '今天在学一食堂吃到了心心念念的红烧肉！而且去图书馆正好有窗边的位置，阳光洒进来的感觉太治愈了。',
-      summary: '美食与阳光带来的小确幸。'
-    },
-    {
-      id: 'mock-3',
-      date: subDays(5),
-      mood: MoodType.NEUTRAL,
-      content: '平平淡淡的一天，上完课去操场走了几圈。没有什么特别的事情发生，但这种平静也挺好的。',
-      summary: '享受平凡日子的宁静。'
-    },
-    {
-      id: 'mock-4',
-      date: subDays(8),
-      mood: MoodType.SAD,
-      content: '给家里打电话，听到妈妈的声音突然有点想家了。虽然在学校也挺好，但有时候还是会觉得孤单。',
-      summary: '思乡之情流露，渴望陪伴。'
-    },
-    {
-      id: 'mock-5',
-      date: subDays(12),
-      mood: MoodType.ANGRY,
-      content: '小组作业队友全程划水，最后还要我来兜底，真的太生气了！为什么会有这么不负责任的人？',
-      summary: '对团队协作中的不公平感到愤怒。'
-    },
-    {
-      id: 'mock-6',
-      date: subDays(15),
-      mood: MoodType.HAPPY,
-      content: '社团活动举办得很成功！虽然很累，但是看到大家开心的样子，觉得一切都值了。',
-      summary: '付出努力后收获的成就感。'
-    },
-    {
-      id: 'mock-7',
-      date: subDays(20),
-      mood: MoodType.ANXIOUS,
-      content: '考研倒计时，感觉复习进度有点落后了，看着周围同学都在拼命，心里有点慌。',
-      summary: '学业竞争带来的同辈压力。'
-    }
-  ];
-};
-
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [globalMood, setGlobalMood] = useState<MoodType>(MoodType.NEUTRAL);
-  // Initialize with mock data so the calendar isn't empty
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(generateMockEntries());
-  
+
   // Persona State - Default to the second one (Rational) per user request
   const [currentPersona, setCurrentPersona] = useState<PersonaConfig>(PERSONAS[1]);
 
@@ -85,7 +22,8 @@ const App: React.FC = () => {
   const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
 
   const handleAddEntry = (entry: JournalEntry) => {
-    setJournalEntries(prev => [entry, ...prev]);
+    // 日记已保存到 Supabase，这里可以添加额外的处理逻辑（如通知）
+    console.log('日记已保存:', entry);
   };
 
   const renderPage = () => {
@@ -107,10 +45,9 @@ const App: React.FC = () => {
                   clearInitialMessage={() => setPendingChatMessage(null)}
                   currentPersona={currentPersona}
                />;
-      case 'calendar': 
-        return <CalendarPage 
-                  entries={journalEntries} 
-                  setGlobalMood={setGlobalMood} 
+      case 'calendar':
+        return <CalendarPage
+                  setGlobalMood={setGlobalMood}
                />;
       case 'campus': return <CampusPage />;
       case 'waterfall': return <WaterfallPage />;

@@ -1,18 +1,40 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { MoodType, JournalEntry } from '../types';
-import { ChevronLeft, ChevronRight, TrendingUp, Zap, BookOpen, Mic, Activity, Sun, CloudRain } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, Zap, BookOpen, Mic, Activity, Sun, CloudRain, Loader2 } from 'lucide-react';
+import { getJournals } from '../services/supabaseService';
 
 interface CalendarPageProps {
-  entries: JournalEntry[];
   setGlobalMood: (mood: MoodType) => void;
 }
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
-export const CalendarPage: React.FC<CalendarPageProps> = ({ entries, setGlobalMood }) => {
+export const CalendarPage: React.FC<CalendarPageProps> = ({ setGlobalMood }) => {
   const [displayDate, setDisplayDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 加载日记数据
+  useEffect(() => {
+    const loadJournals = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getJournals();
+        setEntries(data);
+      } catch (err) {
+        console.error('加载日记失败:', err);
+        setError('加载失败，请刷新重试');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadJournals();
+  }, []);
 
   // --- Helpers ---
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -128,9 +150,35 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({ entries, setGlobalMo
   const emptySlots = Array(startDay).fill(null);
   const daySlots = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // 加载状态
+  if (isLoading) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center">
+        <Loader2 size={40} className="animate-spin text-gray-400 mb-4" />
+        <p className="text-sm text-gray-500">加载中...</p>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-6">
+        <CloudRain size={40} className="text-gray-400 mb-4" />
+        <p className="text-sm text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-gray-800 text-white rounded-xl text-sm hover:bg-black transition-colors"
+        >
+          刷新重试
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col pt-12 px-5 pb-24 max-w-2xl mx-auto overflow-y-auto scrollbar-hide">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-serif font-bold text-gray-800 tracking-wide">Mood</h2>

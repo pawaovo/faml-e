@@ -69,7 +69,7 @@ export const HomePage: React.FC<HomeProps> = ({
   // Helper to determine styles based on active index
   const getCardStyle = (index: number) => {
       const offset = index - activeIndex; // -1, 0, 1
-      
+
       let transform = '';
       let zIndex = 0;
       let opacity = 1;
@@ -82,16 +82,16 @@ export const HomePage: React.FC<HomeProps> = ({
           filter = 'brightness(100%)';
       } else if (offset < 0) {
           // Left
-          transform = 'translateX(-120px) scale(0.8) rotate(-15deg)';
+          transform = 'translateX(-140px) scale(0.7) rotate(-15deg)';
           zIndex = 10;
-          opacity = 0.7;
-          filter = 'brightness(90%) blur(1px)';
+          opacity = 0.35;
+          filter = 'brightness(60%) blur(6px)';
       } else {
           // Right
-          transform = 'translateX(120px) scale(0.8) rotate(15deg)';
+          transform = 'translateX(140px) scale(0.7) rotate(15deg)';
           zIndex = 10;
-          opacity = 0.7;
-          filter = 'brightness(90%) blur(1px)';
+          opacity = 0.35;
+          filter = 'brightness(60%) blur(6px)';
       }
 
       // Hide if out of range of visible 3 (though we only have 3)
@@ -124,36 +124,38 @@ export const HomePage: React.FC<HomeProps> = ({
         </div>
         
         {/* 3D Fan Carousel Area */}
-        <div 
-            className="relative h-72 w-full max-w-sm mx-auto flex items-center justify-center mt-4 mb-4 perspective-1000"
+        <div
+            className="relative h-[28rem] w-full max-w-lg mx-auto flex items-center justify-center mt-4 mb-4 perspective-1000"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >
             {PERSONAS.map((persona, index) => {
                 const style = getCardStyle(index);
+                const offset = index - activeIndex;
                 return (
                     <div
                         key={persona.id}
                         onClick={() => switchCard(index)}
-                        className="absolute w-52 h-52 rounded-[2rem] shadow-2xl transition-all duration-500 ease-out cursor-pointer bg-white overflow-hidden border-4 border-white/50"
+                        className="absolute w-96 h-96 transition-all duration-500 ease-out cursor-pointer hover:scale-105 flex items-center justify-center"
                         style={{
-                            ...style,
-                            boxShadow: activeIndex === index ? '0 20px 50px -12px rgba(0,0,0,0.25)' : 'none'
+                            ...style
                         }}
                     >
-                         <img 
-                            src={persona.image} 
-                            alt={persona.title} 
-                            className="w-full h-full object-cover"
+                         <img
+                            src={persona.image}
+                            alt={persona.title}
+                            className="w-80 h-80 object-contain pointer-events-none"
+                            style={{
+                                filter: `${style.filter} drop-shadow(0 10px 30px rgba(0,0,0,${activeIndex === index ? '0.2' : '0.05'}))`
+                            }}
                          />
-                         {/* Overlay for center card title maybe? Or just keep it clean */}
                     </div>
                 );
             })}
         </div>
 
         {/* Dynamic Text & Persona Details */}
-        <div className="flex-1 flex flex-col items-center justify-start min-h-[140px] transition-all duration-500 mt-12">
+        <div className="flex-1 flex flex-col items-center justify-start min-h-[140px] transition-all duration-500 mt-4">
              <h2 className="text-xl font-medium text-gray-800 mb-2 tracking-widest">
                  {PERSONAS[activeIndex].title}
              </h2>

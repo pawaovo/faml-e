@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Image as ImageIcon, Check, Sparkles, Mic, Square, Trash2, AlertCircle } from 'lucide-react';
 import { MoodType, JournalEntry } from '../types';
 import { generateJournalSummary } from '../services/geminiService';
+import { saveJournal } from '../services/supabaseService';
 
 interface JournalModalProps {
   isOpen: boolean;
@@ -34,9 +35,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [syncToChat, setSyncToChat] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
-  
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioBlobRef = useRef<Blob | null>(null);
 
   if (!isOpen) return null;
 
@@ -65,11 +68,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-           setAudioData(reader.result as string);
-        };
+        // 保存 Blob 对象供上传使用
+        audioBlobRef.current = blob;
+        // 创建 URL 用于播放预览
+        const audioUrl = URL.createObjectURL(blob);
+        setAudioData(audioUrl);
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop());
       };
@@ -104,43 +107,63 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   };
 
   const deleteAudio = () => {
+    if (audioData) {
+      URL.revokeObjectURL(audioData);
+    }
     setAudioData(null);
+    audioBlobRef.current = null;
   };
 
   const handleSave = async () => {
     // Allow saving if there is text OR audio OR images
     if (!content.trim() && !audioData && images.length === 0) return;
-    setIsProcessing(true);
 
-    let summary = '';
-    if (content.trim()) {
+    try {
+      setIsProcessing(true);
+      setSaveError(null);
+
+      // 生成 AI 总结（如果有文本内容）
+      let summary = '';
+      if (content.trim()) {
         summary = await generateJournalSummary(content);
-    }
-    
-    const newEntry: JournalEntry = {
-        id: Date.now().toString(),
+      }
+
+      // 调用 Supabase API 保存日记
+      const savedEntry = await saveJournal({
         content,
-        mood: selectedMood,
         summary,
-        date: new Date().toISOString(),
-        images,
-        audio: audioData || undefined
-    };
+        mood: selectedMood,
+        images: images.length > 0 ? images : undefined,
+        audioBlob: audioBlobRef.current || undefined
+      });
 
-    onSaveEntry(newEntry);
-    setGlobalMood(selectedMood);
+      // 通知父组件（可选）
+      onSaveEntry(savedEntry);
 
-    if (syncToChat && content.trim()) {
+      // 更新全局心情
+      setGlobalMood(selectedMood);
+
+      // 如果选择了同步到对话，启动聊天
+      if (syncToChat && content.trim()) {
         onStartChat(content);
         // Modal will be closed by parent or navigation logic in Home/App
-    } else {
-        // Reset and close
+      } else {
+        // 重置状态并关闭
         setContent('');
         setImages([]);
+        if (audioData) {
+          URL.revokeObjectURL(audioData);
+        }
         setAudioData(null);
+        audioBlobRef.current = null;
         setSyncToChat(false);
-        setIsProcessing(false);
         onClose();
+      }
+    } catch (error) {
+      console.error('保存日记失败:', error);
+      setSaveError('保存失败，请重试');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -215,6 +238,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                     </div>
                 )}
 
+                {/* Save Error Message */}
+                {saveError && (
+                    <div className="flex items-center gap-2 p-3 mb-4 bg-red-50 text-red-600 rounded-xl text-xs">
+                        <AlertCircle size={14} />
+                        {saveError}
+                    </div>
+                )}
+
                 {/* Image Thumbnails */}
                 {images.length > 0 && (
                     <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -270,12 +301,12 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                         </button>
                     </div>
 
-                    <button 
+                    <button
                         onClick={handleSave}
                         disabled={isProcessing}
-                        className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-black transition-all shadow-lg shadow-gray-200 flex items-center gap-2"
+                        className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-black transition-all shadow-lg shadow-gray-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isProcessing ? 'Saving...' : 'Mark'} <Check size={16} />
+                        {isProcessing ? '保存中...' : 'Mark'} <Check size={16} />
                     </button>
                 </div>
             </div>
