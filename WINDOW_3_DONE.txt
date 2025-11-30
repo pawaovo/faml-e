@@ -17,13 +17,20 @@
 - ✅ 错误处理：统一的错误返回格式和日志记录
 - ✅ CORS 支持：允许跨域请求
 
-📌 部署说明：
+📌 部署准备（已完成）：
+- ✅ Supabase CLI 已安装到项目（npm install --save-dev supabase）
+- ✅ 部署脚本已添加到 package.json
+- ✅ 快速部署指南已创建（QUICK_DEPLOY.md）
+- ✅ 详细部署文档已创建（deploy-edge-function.md）
+
+📌 部署说明（需手动执行）：
 - Edge Function 代码已完成，需要通过 Supabase CLI 或 Dashboard 部署
 - 部署前需在 Supabase Dashboard 设置环境变量：
   * GEMINI_API_KEY
   * SUPABASE_URL
   * SUPABASE_SERVICE_ROLE_KEY
-- 详细部署步骤见 supabase/functions/DEPLOYMENT.md
+- 快速部署：运行 `npm run supabase:login` → `npm run supabase:link` → `npm run supabase:deploy`
+- 详细步骤见：QUICK_DEPLOY.md 或 deploy-edge-function.md
 
 🔗 API 端点：
 - Edge Function URL: https://xumbiixfvumebxyrtueu.supabase.co/functions/v1/gemini-chat
