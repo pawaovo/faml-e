@@ -20,6 +20,7 @@ interface ChatRequest {
   sessionId?: string;
   isAudio?: boolean;
   audioData?: string; // base64
+  type?: "chat" | "summary"; // 请求类型：聊天或日记摘要
 }
 
 // Persona 系统提示词配置
@@ -132,6 +133,45 @@ async function transcribeAudio(audioData: string): Promise<string> {
   return "[音频消息已接收，转写功能待实现]";
 }
 
+// 生成日记摘要（非流式）
+async function generateJournalSummary(content: string): Promise<string> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `请将以下日记内容总结为一句温暖且富有洞察力的话，送给这位同学。关注潜在的情绪。请用中文回答，不要超过50字。日记内容: "${content}"`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 200,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Gemini API error:", response.status, errorText);
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  return text.trim() || "记录下这一刻的心情，是自我关怀的开始。";
+}
+
 // 调用 Gemini API（流式）
 async function callGeminiStream(
   systemPrompt: string,
@@ -195,9 +235,36 @@ Deno.serve(async (req) => {
   try {
     // 解析请求体
     const body: ChatRequest = await req.json();
-    const { message, persona, sessionId, isAudio, audioData } = body;
+    const { message, persona, sessionId, isAudio, audioData, type } = body;
 
-    // 验证必需字段
+    // 处理日记摘要请求（非流式）
+    if (type === "summary") {
+      if (!message) {
+        return new Response(
+          JSON.stringify({ error: "缺少必需字段：message" }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
+      }
+
+      const summary = await generateJournalSummary(message);
+      return new Response(
+        JSON.stringify({ summary }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+    }
+
+    // 验证必需字段（聊天模式）
     if (!message || !persona) {
       return new Response(
         JSON.stringify({ error: "缺少必需字段：message 和 persona" }),

@@ -1,10 +1,5 @@
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
-
-const ai = new GoogleGenAI({ apiKey });
 
 export interface StreamChunk {
   text: string;
@@ -122,11 +117,26 @@ export const streamChat = async (
 
 export const generateJournalSummary = async (entry: string): Promise<string> => {
   try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `请将以下日记内容总结为一句温暖且富有洞察力的话，送给这位同学。关注潜在的情绪。请用中文回答。日记内容: "${entry}"`,
+    assertEnv();
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/gemini-chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        message: entry,
+        type: "summary",
+      }),
     });
-    return response.text || "暂时无法生成总结。";
+
+    if (!response.ok) {
+      throw new Error(`Edge Function error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.summary || "暂时无法生成总结。";
   } catch (error) {
     console.error("Error generating summary:", error);
     return "暂时无法连接到 AI。";
