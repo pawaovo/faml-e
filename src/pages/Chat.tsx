@@ -147,22 +147,11 @@ export const ChatPage: React.FC<ChatProps> = ({
         setSessions(sessionList);
 
         // 每次进入都显示问候语，开始新对话
-        setSessionId(null);
-        setMessages([{
-          id: 'welcome',
-          role: 'model',
-          text: getGreeting(currentPersona.id),
-          timestamp: new Date()
-        }]);
+        resetToNewSession();
       } catch (err) {
         console.error('初始化聊天失败:', err);
         // 降级：显示问候语
-        setMessages([{
-          id: 'welcome',
-          role: 'model',
-          text: getGreeting(currentPersona.id),
-          timestamp: new Date()
-        }]);
+        resetToNewSession();
       }
     };
 
@@ -175,15 +164,7 @@ export const ChatPage: React.FC<ChatProps> = ({
     if (prevPersonaRef.current !== currentPersona.id) {
       prevPersonaRef.current = currentPersona.id;
       // 清空当前会话，显示新 Persona 的问候语
-      setSessionId(null);
-      setPendingText('');
-      setIsStreaming(false);
-      setMessages([{
-        id: 'welcome',
-        role: 'model',
-        text: getGreeting(currentPersona.id),
-        timestamp: new Date()
-      }]);
+      resetToNewSession();
       hasSentInitialRef.current = false;
     }
   }, [currentPersona.id]);
@@ -248,6 +229,19 @@ export const ChatPage: React.FC<ChatProps> = ({
     }
   };
 
+  // 重置为新会话（公共逻辑）
+  const resetToNewSession = () => {
+    setSessionId(null);
+    setPendingText('');
+    setIsStreaming(false);
+    setMessages([{
+      id: 'welcome',
+      role: 'model',
+      text: getGreeting(currentPersona.id),
+      timestamp: new Date()
+    }]);
+  };
+
   // 切换会话
   const switchSession = async (session: ChatSession) => {
     try {
@@ -270,15 +264,7 @@ export const ChatPage: React.FC<ChatProps> = ({
 
   // 新建会话
   const createNewSession = () => {
-    setSessionId(null);
-    setPendingText('');
-    setIsStreaming(false);
-    setMessages([{
-      id: 'welcome',
-      role: 'model',
-      text: getGreeting(currentPersona.id),
-      timestamp: new Date()
-    }]);
+    resetToNewSession();
     setIsSessionMenuOpen(false);
   };
 
@@ -509,11 +495,7 @@ export const ChatPage: React.FC<ChatProps> = ({
           {/* Session Dropdown */}
           <div className="relative mt-4 z-[9999]">
             <button
-              onClick={() => {
-                console.log('[菜单按钮] 点击，当前状态:', isSessionMenuOpen);
-                console.log('[菜单按钮] 即将显示的会话数:', currentPersonaSessions.length);
-                setIsSessionMenuOpen(!isSessionMenuOpen);
-              }}
+              onClick={() => setIsSessionMenuOpen(!isSessionMenuOpen)}
               className="flex items-center gap-1.5 p-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-gray-700 border border-white/50 shadow-sm transition-all"
             >
               <MessageSquare size={16} />
@@ -530,7 +512,6 @@ export const ChatPage: React.FC<ChatProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('[新建会话] 按钮点击');
                     createNewSession();
                   }}
                   className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100"
@@ -549,7 +530,6 @@ export const ChatPage: React.FC<ChatProps> = ({
                         key={session.id}
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('[会话项] 点击会话:', session);
                           switchSession(session);
                         }}
                         className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left ${
