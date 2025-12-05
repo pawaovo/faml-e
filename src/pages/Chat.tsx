@@ -142,14 +142,11 @@ export const ChatPage: React.FC<ChatProps> = ({
   useEffect(() => {
     const init = async () => {
       try {
-        console.log('[初始化] 开始加载会话列表...');
         // 加载会话列表（用于"消息"按钮下拉菜单）
         const sessionList = await listChatSessions();
-        console.log('[初始化] 从数据库加载的会话列表:', sessionList);
         setSessions(sessionList);
 
         // 每次进入都显示问候语，开始新对话
-        console.log('[初始化] 显示问候语，准备新对话');
         setSessionId(null);
         setMessages([{
           id: 'welcome',
@@ -254,12 +251,9 @@ export const ChatPage: React.FC<ChatProps> = ({
   // 切换会话
   const switchSession = async (session: ChatSession) => {
     try {
-      console.log('[switchSession] 开始切换会话:', session.id);
       setSessionId(session.id);
       localStorage.setItem('famlee_last_session', session.id);
       const history = await fetchMessages(session.id);
-      console.log('[switchSession] 获取到的历史消息数量:', history.length);
-      console.log('[switchSession] 历史消息:', history);
       setMessages(history.length > 0 ? history.map(mapDBMessageToLocal) : [{
         id: 'welcome',
         role: 'model',
@@ -269,7 +263,6 @@ export const ChatPage: React.FC<ChatProps> = ({
       setIsSessionMenuOpen(false);
       setPendingText('');
       setIsStreaming(false);
-      console.log('[switchSession] 会话切换完成');
     } catch (err) {
       console.error('切换会话失败:', err);
     }
@@ -493,19 +486,11 @@ export const ChatPage: React.FC<ChatProps> = ({
   // 获取当前 Persona 的会话列表
   const currentPersonaSessions = sessions.filter(s => s.persona === currentPersona.id);
 
-  // 调试日志
-  useEffect(() => {
-    console.log('[会话列表] 当前 Persona:', currentPersona.id);
-    console.log('[会话列表] 所有会话数量:', sessions.length);
-    console.log('[会话列表] 当前 Persona 的会话数量:', currentPersonaSessions.length);
-    console.log('[会话列表] 当前 Persona 的会话:', currentPersonaSessions);
-  }, [sessions, currentPersona.id]);
-
   return (
     <div className="h-full flex flex-col pt-10 pb-24 px-4 max-w-2xl mx-auto relative">
 
       {/* Top Section: IP Image + Session Selector */}
-      <div className="flex flex-col items-center mb-4 z-10 shrink-0">
+      <div className="flex flex-col items-center mb-4 z-[10001] shrink-0">
           <div className="relative w-24 h-24">
               <div className="absolute inset-0 bg-yellow-200/50 rounded-full blur-xl animate-pulse"></div>
               <img

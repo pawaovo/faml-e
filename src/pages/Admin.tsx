@@ -1,45 +1,39 @@
 import React, { useState } from 'react';
-import { BarChart3, Calendar, TrendingUp, Users, LogOut } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  BarChart3,
+  Calendar,
+  Settings,
+  HelpCircle,
+  Search,
+  LogOut,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  PlusCircle,
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
-import { generateMockStats, mockCampusEvents, type MockCampusEvent } from '@/data/mockAdminData';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { generateMockStats, mockCampusEvents, type MockCampusEvent } from '@/data/mockAdminData';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MoodType } from '../types';
 
 // Mood 颜色映射
 const MOOD_COLORS: Record<MoodType, string> = {
-  [MoodType.HAPPY]: '#FFD700',
+  [MoodType.HAPPY]: '#72e3ad',
   [MoodType.ANXIOUS]: '#6366F1',
   [MoodType.SAD]: '#94A3B8',
   [MoodType.ANGRY]: '#EF4444',
   [MoodType.NEUTRAL]: '#D1D5DB',
-};
-
-const MOOD_LABELS: Record<MoodType, string> = {
-  [MoodType.HAPPY]: '开心',
-  [MoodType.ANXIOUS]: '焦虑',
-  [MoodType.SAD]: '悲伤',
-  [MoodType.ANGRY]: '愤怒',
-  [MoodType.NEUTRAL]: '平和',
 };
 
 interface AdminPageProps {
@@ -47,11 +41,10 @@ interface AdminPageProps {
 }
 
 export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState('statistics');
-  const [timePeriod, setTimePeriod] = useState<'day' | 'week' | 'month'>('week');
+  const [activeView, setActiveView] = useState('dashboard');
+  const [timePeriod, setTimePeriod] = useState<'day' | 'week' | 'month'>('month');
   const [events, setEvents] = useState<MockCampusEvent[]>(mockCampusEvents);
 
-  // 新活动表单状态
   const [newEvent, setNewEvent] = useState({
     title: '',
     date: '',
@@ -63,7 +56,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
 
   const stats = generateMockStats(timePeriod);
 
-  // 发布新活动
   const handlePublishEvent = () => {
     if (!newEvent.title || !newEvent.date || !newEvent.location) {
       alert('请填写完整的活动信息');
@@ -78,8 +70,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
     };
 
     setEvents([event, ...events]);
-
-    // 重置表单
     setNewEvent({
       title: '',
       date: '',
@@ -92,223 +82,323 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
     alert('活动发布成功!');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('famlee_admin_token');
-    onLogout();
-  };
+  // 侧边栏菜单项
+  const menuItems = [
+    { id: 'dashboard', icon: LayoutDashboard, label: '数据统计' },
+    { id: 'events', icon: Calendar, label: '活动发布' },
+    { id: 'users', icon: Users, label: '用户管理' },
+    { id: 'reports', icon: FileText, label: '报告分析' },
+    { id: 'analytics', icon: BarChart3, label: '数据分析' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Top Navigation Bar */}
-      <nav className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div className="flex h-screen bg-background">
+      {/* 左侧导航栏 */}
+      <aside className="w-64 bg-card border-r border-border flex flex-col">
+        {/* Logo */}
+        <div className="p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">F</span>
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xl">F</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Famlée 后台管理</h1>
-              <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+              <h1 className="text-lg font-bold text-foreground">Famlée</h1>
+              <p className="text-xs text-muted-foreground">后台管理</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-foreground">管理员</p>
-              <p className="text-xs text-muted-foreground">admin</p>
+        </div>
+
+        {/* Quick Create Button */}
+        <div className="px-4 mb-4">
+          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+            <PlusCircle className="w-4 h-4" />
+            快速创建
+          </Button>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                  isActive
+                    ? 'bg-accent text-accent-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <Separator />
+
+        {/* Bottom Section */}
+        <div className="p-4 space-y-3">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground rounded-lg transition-colors">
+            <Settings className="w-5 h-5" />
+            <span className="text-sm">设置</span>
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground rounded-lg transition-colors">
+            <HelpCircle className="w-5 h-5" />
+            <span className="text-sm">帮助</span>
+          </button>
+
+          <Separator />
+
+          {/* User Info */}
+          <div className="flex items-center gap-3 px-3 py-2">
+            <Avatar className="w-9 h-9">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                AD
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">管理员</p>
+              <p className="text-xs text-muted-foreground truncate">admin</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 h-8 w-8"
+              onClick={onLogout}
+              title="退出登录"
+            >
               <LogOut className="w-4 h-4" />
-              退出登录
             </Button>
           </div>
         </div>
-      </nav>
+      </aside>
 
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Page Description */}
-        <div className="mb-8">
-          <p className="text-muted-foreground">数据统计与校园活动管理中心</p>
-        </div>
-
-        {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="statistics" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              数据统计
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              活动发布
-            </TabsTrigger>
-          </TabsList>
-
-          {/* 数据统计面板 */}
-          <TabsContent value="statistics">
-            {/* 时间维度选择 */}
-            <div className="mb-6 flex items-center gap-4">
-              <Label className="text-sm font-medium">时间维度:</Label>
-              <Select
-                value={timePeriod}
-                onChange={(e) => setTimePeriod(e.target.value as 'day' | 'week' | 'month')}
-              >
-                <option value="day">今日</option>
-                <option value="week">本周</option>
-                <option value="month">本月</option>
-              </Select>
+      {/* 主内容区 */}
+      <main className="flex-1 overflow-auto">
+        {/* Dashboard View */}
+        {activeView === 'dashboard' && (
+          <div className="p-8">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-foreground mb-1">数据统计</h2>
+                <p className="text-muted-foreground">欢迎回来，这是您的数据概览</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="搜索..."
+                    className="pl-9 w-64"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* 统计卡片 */}
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">总对话次数</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+              {/* Total Revenue Card */}
+              <Card className="relative overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardDescription className="text-sm font-medium">总对话次数</CardDescription>
+                    <Badge variant="success" className="gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      +12.5%
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalConversations}</div>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {stats.totalConversations.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    本月持续上升
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {timePeriod === 'day' ? '今日' : timePeriod === 'week' ? '本周' : '本月'}
+                    最近 6 个月访客数
                   </p>
                 </CardContent>
               </Card>
 
-              {stats.moodDistribution.slice(0, 3).map((item) => (
-                <Card key={item.mood}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{MOOD_LABELS[item.mood]}</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{item.count}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      占比 {item.percentage}%
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* 图表区域 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* 对话趋势图 */}
+              {/* New Customers Card */}
               <Card>
-                <CardHeader>
-                  <CardTitle>对话量趋势</CardTitle>
-                  <CardDescription>
-                    {timePeriod === 'day' ? '24小时' : timePeriod === 'week' ? '7天' : '30天'}趋势分析
-                  </CardDescription>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardDescription className="text-sm font-medium">开心情绪</CardDescription>
+                    <Badge variant="warning" className="gap-1">
+                      <TrendingDown className="w-3 h-3" />
+                      -5%
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={stats.trendData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="conversations"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        name="对话次数"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {stats.moodDistribution.find(m => m.mood === MoodType.HAPPY)?.count || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <TrendingDown className="w-3 h-3" />
+                    本周期略有下降
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    需要关注改善措施
+                  </p>
                 </CardContent>
               </Card>
 
-              {/* Mood 分布饼图 */}
+              {/* Active Accounts Card */}
               <Card>
-                <CardHeader>
-                  <CardTitle>心情分布</CardTitle>
-                  <CardDescription>各类心情占比统计</CardDescription>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardDescription className="text-sm font-medium">焦虑情绪</CardDescription>
+                    <Badge variant="success" className="gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      +8%
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={stats.moodDistribution}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={(entry) => `${MOOD_LABELS[entry.mood]} ${entry.percentage}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="count"
-                      >
-                        {stats.moodDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={MOOD_COLORS[entry.mood]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {stats.moodDistribution.find(m => m.mood === MoodType.ANXIOUS)?.count || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    用户留存率良好
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    互动超出预期目标
+                  </p>
                 </CardContent>
               </Card>
 
-              {/* Mood 对比柱状图 */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>心情变化趋势对比</CardTitle>
-                  <CardDescription>各类心情随时间变化的详细对比</CardDescription>
+              {/* Growth Rate Card */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardDescription className="text-sm font-medium">平和情绪</CardDescription>
+                    <Badge variant="secondary" className="gap-1">
+                      <Minus className="w-3 h-3" />
+                      稳定
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.trendData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="happy" fill={MOOD_COLORS[MoodType.HAPPY]} name="开心" />
-                      <Bar dataKey="anxious" fill={MOOD_COLORS[MoodType.ANXIOUS]} name="焦虑" />
-                      <Bar dataKey="sad" fill={MOOD_COLORS[MoodType.SAD]} name="悲伤" />
-                      <Bar dataKey="angry" fill={MOOD_COLORS[MoodType.ANGRY]} name="愤怒" />
-                      <Bar dataKey="neutral" fill={MOOD_COLORS[MoodType.NEUTRAL]} name="平和" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {stats.moodDistribution.find(m => m.mood === MoodType.NEUTRAL)?.percentage}%
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Minus className="w-3 h-3" />
+                    保持稳定表现
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    符合增长预期
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* AI 总结 */}
+            {/* Chart Section */}
             <Card>
               <CardHeader>
-                <CardTitle>AI 心情分析总结</CardTitle>
-                <CardDescription>基于用户对话的智能心理趋势分析</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl">对话量趋势</CardTitle>
+                    <CardDescription className="mt-1">最近 3 个月总计</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={timePeriod === 'month' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTimePeriod('month')}
+                    >
+                      最近 3 个月
+                    </Button>
+                    <Button
+                      variant={timePeriod === 'week' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTimePeriod('week')}
+                    >
+                      最近 30 天
+                    </Button>
+                    <Button
+                      variant={timePeriod === 'day' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTimePeriod('day')}
+                    >
+                      最近 7 天
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {stats.aiSummary.map((item) => (
-                    <div
-                      key={item.mood}
-                      className="flex items-start gap-4 p-4 rounded-lg border"
-                      style={{ borderColor: MOOD_COLORS[item.mood] + '40' }}
-                    >
-                      <div
-                        className="w-3 h-3 rounded-full mt-1 shrink-0"
-                        style={{ backgroundColor: MOOD_COLORS[item.mood] }}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-sm mb-1">{MOOD_LABELS[item.mood]}</div>
-                        <p className="text-sm text-gray-600">{item.summary}</p>
-                      </div>
-                      <div className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                        {item.trend === 'up' ? '↑ 上升' : item.trend === 'down' ? '↓ 下降' : '→ 稳定'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ResponsiveContainer width="100%" height={400}>
+                  <AreaChart data={stats.trendData}>
+                    <defs>
+                      <linearGradient id="colorPrimary" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#72e3ad" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#72e3ad" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorSecondary" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#9ca3af"
+                      fontSize={12}
+                      tickLine={false}
+                    />
+                    <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="happy"
+                      stroke="#72e3ad"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorPrimary)"
+                      name="开心"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="anxious"
+                      stroke="#6366F1"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorSecondary)"
+                      name="焦虑"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* 活动发布面板 */}
-          <TabsContent value="events">
+        {/* Events View */}
+        {activeView === 'events' && (
+          <div className="p-8">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-1">活动发布</h2>
+              <p className="text-muted-foreground">管理校园心理活动</p>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* 发布新活动表单 */}
+              {/* 发布新活动 */}
               <Card>
                 <CardHeader>
                   <CardTitle>发布新活动</CardTitle>
@@ -340,9 +430,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                     <Select
                       id="type"
                       value={newEvent.type}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, type: e.target.value as any })
-                      }
+                      onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as any })}
                     >
                       <option value="讲座">讲座</option>
                       <option value="团辅">团辅</option>
@@ -366,10 +454,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                     <Textarea
                       id="description"
                       value={newEvent.description}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, description: e.target.value })
-                      }
-                      placeholder="简要描述活动内容和注意事项"
+                      onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                      placeholder="简要描述活动内容"
                       rows={4}
                     />
                   </div>
@@ -390,7 +476,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                 </CardContent>
               </Card>
 
-              {/* 已发布活动列表 */}
+              {/* 已发布活动 */}
               <Card>
                 <CardHeader>
                   <CardTitle>已发布活动</CardTitle>
@@ -401,7 +487,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                     {events.map((event) => (
                       <div
                         key={event.id}
-                        className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                        className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-start gap-3">
                           {event.imageUrl && (
@@ -412,30 +498,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                             />
                           )}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm mb-1 truncate">
-                              {event.title}
-                            </h4>
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                              <span className="px-2 py-0.5 bg-primary/10 text-primary rounded">
-                                {event.type}
-                              </span>
+                            <h4 className="font-medium text-sm mb-1 truncate">{event.title}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                              <Badge variant="secondary">{event.type}</Badge>
                               <span>{event.date}</span>
                             </div>
-                            <p className="text-xs text-gray-600 line-clamp-2">
+                            <p className="text-xs text-muted-foreground line-clamp-2">
                               {event.description}
                             </p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-xs text-gray-400">{event.location}</span>
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full ${
-                                  event.status === 'published'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-100 text-gray-600'
-                                }`}
-                              >
-                                {event.status === 'published' ? '已发布' : '草稿'}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -444,9 +514,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        )}
+
+        {/* Placeholder for other views */}
+        {!['dashboard', 'events'].includes(activeView) && (
+          <div className="p-8">
+            <Card className="p-12 text-center">
+              <CardTitle className="text-2xl mb-2">功能开发中</CardTitle>
+              <CardDescription>该功能正在开发中，敬请期待...</CardDescription>
+            </Card>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
