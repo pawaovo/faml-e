@@ -142,8 +142,10 @@ export const ChatPage: React.FC<ChatProps> = ({
   useEffect(() => {
     const init = async () => {
       try {
+        console.log('[初始化] 开始加载会话列表...');
         // 加载会话列表
         const sessionList = await listChatSessions();
+        console.log('[初始化] 从数据库加载的会话列表:', sessionList);
         setSessions(sessionList);
 
         // 尝试从 localStorage 恢复最近会话
@@ -154,8 +156,10 @@ export const ChatPage: React.FC<ChatProps> = ({
 
         if (matchingSession) {
           // 恢复历史会话
+          console.log('[初始化] 恢复历史会话:', matchingSession.id);
           setSessionId(matchingSession.id);
           const history = await fetchMessages(matchingSession.id);
+          console.log('[初始化] 历史消息数量:', history.length);
           if (history.length > 0) {
             setMessages(history.map(mapDBMessageToLocal));
           } else {
@@ -169,6 +173,7 @@ export const ChatPage: React.FC<ChatProps> = ({
           }
         } else {
           // 无匹配会话，显示问候语（首次发送时创建会话）
+          console.log('[初始化] 无匹配会话，显示问候语');
           setSessionId(null);
           setMessages([{
             id: 'welcome',
@@ -274,9 +279,12 @@ export const ChatPage: React.FC<ChatProps> = ({
   // 切换会话
   const switchSession = async (session: ChatSession) => {
     try {
+      console.log('[switchSession] 开始切换会话:', session.id);
       setSessionId(session.id);
       localStorage.setItem('famlee_last_session', session.id);
       const history = await fetchMessages(session.id);
+      console.log('[switchSession] 获取到的历史消息数量:', history.length);
+      console.log('[switchSession] 历史消息:', history);
       setMessages(history.length > 0 ? history.map(mapDBMessageToLocal) : [{
         id: 'welcome',
         role: 'model',
@@ -286,6 +294,7 @@ export const ChatPage: React.FC<ChatProps> = ({
       setIsSessionMenuOpen(false);
       setPendingText('');
       setIsStreaming(false);
+      console.log('[switchSession] 会话切换完成');
     } catch (err) {
       console.error('切换会话失败:', err);
     }
@@ -509,6 +518,14 @@ export const ChatPage: React.FC<ChatProps> = ({
   // 获取当前 Persona 的会话列表
   const currentPersonaSessions = sessions.filter(s => s.persona === currentPersona.id);
 
+  // 调试日志
+  useEffect(() => {
+    console.log('[会话列表] 当前 Persona:', currentPersona.id);
+    console.log('[会话列表] 所有会话数量:', sessions.length);
+    console.log('[会话列表] 当前 Persona 的会话数量:', currentPersonaSessions.length);
+    console.log('[会话列表] 当前 Persona 的会话:', currentPersonaSessions);
+  }, [sessions, currentPersona.id]);
+
   return (
     <div className="h-full flex flex-col pt-10 pb-24 px-4 max-w-2xl mx-auto relative">
 
@@ -530,9 +547,13 @@ export const ChatPage: React.FC<ChatProps> = ({
           </div>
 
           {/* Session Dropdown */}
-          <div className="relative mt-4">
+          <div className="relative mt-4 z-50">
             <button
-              onClick={() => setIsSessionMenuOpen(!isSessionMenuOpen)}
+              onClick={() => {
+                console.log('[菜单按钮] 点击，当前状态:', isSessionMenuOpen);
+                console.log('[菜单按钮] 即将显示的会话数:', currentPersonaSessions.length);
+                setIsSessionMenuOpen(!isSessionMenuOpen);
+              }}
               className="flex items-center gap-1.5 p-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-gray-700 border border-white/50 shadow-sm transition-all"
             >
               <MessageSquare size={16} />
@@ -541,10 +562,13 @@ export const ChatPage: React.FC<ChatProps> = ({
 
             {/* Dropdown Menu */}
             {isSessionMenuOpen && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden z-50 animate-fade-in">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden animate-fade-in">
                 {/* New Session Button */}
                 <button
-                  onClick={createNewSession}
+                  onClick={() => {
+                    console.log('[新建会话] 按钮点击');
+                    createNewSession();
+                  }}
                   className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100"
                 >
                   <Plus size={16} className="text-gray-500" />
@@ -559,7 +583,10 @@ export const ChatPage: React.FC<ChatProps> = ({
                     currentPersonaSessions.slice(0, 5).map(session => (
                       <button
                         key={session.id}
-                        onClick={() => switchSession(session)}
+                        onClick={() => {
+                          console.log('[会话项] 点击会话:', session);
+                          switchSession(session);
+                        }}
                         className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left ${
                           session.id === sessionId ? 'bg-indigo-50' : ''
                         }`}
