@@ -112,10 +112,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
               <button
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
                   isActive
-                    ? 'bg-primary/10 text-primary font-semibold shadow-sm border-l-4 border-primary'
-                    : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground'
+                    ? 'bg-primary text-primary-foreground font-medium shadow-sm'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -129,11 +129,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
 
         {/* Bottom Section */}
         <div className="p-4 space-y-3">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-primary/5 hover:text-foreground rounded-lg transition-colors">
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-colors">
             <Settings className="w-5 h-5" />
             <span className="text-sm">设置</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-primary/5 hover:text-foreground rounded-lg transition-colors">
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-colors">
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">帮助</span>
           </button>

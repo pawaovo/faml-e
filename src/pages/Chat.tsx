@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, AlertCircle, X, ChevronRight, ArrowRight, AudioLines, ChevronDown, Plus, MessageSquare } from 'lucide-react';
+import { Send, Mic, AlertCircle, X, ChevronRight, ArrowRight, AudioLines, Plus, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { streamChat, StreamChunk } from '../services/geminiService';
 import { listChatSessions, fetchMessages } from '../services/supabaseService';
@@ -496,10 +496,9 @@ export const ChatPage: React.FC<ChatProps> = ({
           <div className="relative mt-4 z-[9999]">
             <button
               onClick={() => setIsSessionMenuOpen(!isSessionMenuOpen)}
-              className="flex items-center gap-1.5 p-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-gray-700 border border-white/50 shadow-sm transition-all"
+              className="flex items-center justify-center p-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-gray-700 border border-white/50 shadow-sm transition-all"
             >
               <MessageSquare size={16} />
-              <ChevronDown size={16} className={`transition-transform ${isSessionMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
