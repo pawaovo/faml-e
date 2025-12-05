@@ -91,9 +91,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
       {/* 左侧导航栏 */}
       <aside className="w-64 bg-card border-r border-border flex flex-col">
         {/* Logo */}
-        <div className="p-6 pb-8">
+        <div className="p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xl">F</span>
             </div>
             <div>
@@ -104,18 +104,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 px-3 pt-2">
-          {menuItems.map((item) => {
+        <nav className="flex-1 px-3 pt-2">{menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all ${
                   isActive
                     ? 'bg-primary text-primary-foreground font-medium shadow-sm'
-                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -129,11 +128,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
 
         {/* Bottom Section */}
         <div className="p-4 space-y-3">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-colors">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground rounded-lg transition-colors">
             <Settings className="w-5 h-5" />
             <span className="text-sm">设置</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-colors">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground rounded-lg transition-colors">
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">帮助</span>
           </button>

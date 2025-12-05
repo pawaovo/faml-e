@@ -513,10 +513,9 @@ export const ChatPage: React.FC<ChatProps> = ({
                     e.stopPropagation();
                     createNewSession();
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100"
+                  className="w-full px-4 py-3 flex items-center justify-center hover:bg-gray-50 transition-colors border-b border-gray-100"
                 >
-                  <Plus size={16} className="text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">新建对话</span>
+                  <Plus size={20} className="text-gray-500" />
                 </button>
 
                 {/* Session List */}
