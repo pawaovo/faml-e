@@ -278,7 +278,7 @@ export const createChatSession = async (persona: string): Promise<ChatSession> =
 };
 
 /**
- * 获取用户的所有聊天会话
+ * 获取用户的所有聊天会话（包含第一条用户消息预览）
  * @returns 会话数组，按创建时间倒序
  */
 export const listChatSessions = async (): Promise<ChatSession[]> => {
@@ -295,7 +295,35 @@ export const listChatSessions = async (): Promise<ChatSession[]> => {
       throw new Error(`会话列表加载失败: ${error.message}`);
     }
 
-    return (data ?? []) as ChatSession[];
+    const sessions = (data ?? []) as ChatSession[];
+
+    // 并发获取每个会话的第一条用户消息
+    const sessionsWithFirstMessage = await Promise.all(
+      sessions.map(async (session) => {
+        try {
+          const { data: messages, error: msgError } = await supabase
+            .from('chat_messages')
+            .select('content')
+            .eq('session_id', session.id)
+            .eq('role', 'user')
+            .order('created_at', { ascending: true })
+            .limit(1);
+
+          if (!msgError && messages && messages.length > 0) {
+            return {
+              ...session,
+              firstUserMessage: messages[0].content
+            };
+          }
+          return session;
+        } catch (err) {
+          console.error(`加载会话 ${session.id} 的第一条消息失败:`, err);
+          return session;
+        }
+      })
+    );
+
+    return sessionsWithFirstMessage;
   } catch (error) {
     console.error('listChatSessions 错误:', error);
     throw error;

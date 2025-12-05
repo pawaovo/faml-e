@@ -27,6 +27,7 @@ export interface ChatSession {
   user_id: string;
   persona: string;
   created_at: string;
+  firstUserMessage?: string; // 第一条用户消息（用于会话列表预览）
 }
 
 // 数据库聊天消息类型（与上面的 ChatMessage 区分）

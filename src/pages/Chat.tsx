@@ -530,13 +530,10 @@ export const ChatPage: React.FC<ChatProps> = ({
           <div className="relative mt-4">
             <button
               onClick={() => setIsSessionMenuOpen(!isSessionMenuOpen)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-sm text-gray-700 border border-white/50 shadow-sm transition-all"
+              className="flex items-center gap-1.5 p-2 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full text-gray-700 border border-white/50 shadow-sm transition-all"
             >
-              <MessageSquare size={14} />
-              <span className="max-w-[150px] truncate">
-                {sessionId ? `对话 ${formatSessionTime(sessions.find(s => s.id === sessionId)?.created_at || '')}` : '新对话'}
-              </span>
-              <ChevronDown size={14} className={`transition-transform ${isSessionMenuOpen ? 'rotate-180' : ''}`} />
+              <MessageSquare size={16} />
+              <ChevronDown size={16} className={`transition-transform ${isSessionMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
@@ -564,10 +561,10 @@ export const ChatPage: React.FC<ChatProps> = ({
                           session.id === sessionId ? 'bg-indigo-50' : ''
                         }`}
                       >
-                        <span className="text-sm text-gray-700 truncate">
-                          与 {session.persona === 'healing' ? 'Melty' : session.persona === 'rational' ? 'Logic' : 'Spark'} 的对话
+                        <span className="text-sm text-gray-700 truncate flex-1 mr-2">
+                          {session.firstUserMessage || '新对话'}
                         </span>
-                        <span className="text-xs text-gray-400 shrink-0 ml-2">
+                        <span className="text-xs text-gray-400 shrink-0">
                           {formatSessionTime(session.created_at)}
                         </span>
                       </button>
