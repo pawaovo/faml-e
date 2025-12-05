@@ -138,50 +138,25 @@ export const ChatPage: React.FC<ChatProps> = ({
     }
   };
 
-  // 初始化：加载会话列表和历史
+  // 初始化：加载会话列表，每次进入都新开对话
   useEffect(() => {
     const init = async () => {
       try {
         console.log('[初始化] 开始加载会话列表...');
-        // 加载会话列表
+        // 加载会话列表（用于"消息"按钮下拉菜单）
         const sessionList = await listChatSessions();
         console.log('[初始化] 从数据库加载的会话列表:', sessionList);
         setSessions(sessionList);
 
-        // 尝试从 localStorage 恢复最近会话
-        const cachedSessionId = localStorage.getItem('famlee_last_session');
-        const matchingSession = cachedSessionId
-          ? sessionList.find(s => s.id === cachedSessionId && s.persona === currentPersona.id)
-          : null;
-
-        if (matchingSession) {
-          // 恢复历史会话
-          console.log('[初始化] 恢复历史会话:', matchingSession.id);
-          setSessionId(matchingSession.id);
-          const history = await fetchMessages(matchingSession.id);
-          console.log('[初始化] 历史消息数量:', history.length);
-          if (history.length > 0) {
-            setMessages(history.map(mapDBMessageToLocal));
-          } else {
-            // 会话存在但无消息，显示问候语
-            setMessages([{
-              id: 'welcome',
-              role: 'model',
-              text: getGreeting(currentPersona.id),
-              timestamp: new Date()
-            }]);
-          }
-        } else {
-          // 无匹配会话，显示问候语（首次发送时创建会话）
-          console.log('[初始化] 无匹配会话，显示问候语');
-          setSessionId(null);
-          setMessages([{
-            id: 'welcome',
-            role: 'model',
-            text: getGreeting(currentPersona.id),
-            timestamp: new Date()
-          }]);
-        }
+        // 每次进入都显示问候语，开始新对话
+        console.log('[初始化] 显示问候语，准备新对话');
+        setSessionId(null);
+        setMessages([{
+          id: 'welcome',
+          role: 'model',
+          text: getGreeting(currentPersona.id),
+          timestamp: new Date()
+        }]);
       } catch (err) {
         console.error('初始化聊天失败:', err);
         // 降级：显示问候语
@@ -563,7 +538,7 @@ export const ChatPage: React.FC<ChatProps> = ({
             {/* Dropdown Menu */}
             {isSessionMenuOpen && (
               <div
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden animate-fade-in"
+                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden animate-fade-in z-[10000]"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* New Session Button */}
@@ -614,7 +589,7 @@ export const ChatPage: React.FC<ChatProps> = ({
       {/* Click outside to close dropdown */}
       {isSessionMenuOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[9998]"
           onClick={() => setIsSessionMenuOpen(false)}
         />
       )}

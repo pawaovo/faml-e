@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FluidBackground } from './components/FluidBackground';
 import { HomePage } from './pages/Home';
 import { ChatPage } from './pages/Chat';
@@ -8,11 +8,17 @@ import { CampusPage } from './pages/Campus';
 import { WaterfallPage } from './pages/Waterfall';
 import { ProfilePage } from './pages/Profile';
 import { AdminPage } from './pages/Admin';
+import { AdminLogin } from './pages/AdminLogin';
 import { MoodType, JournalEntry, PersonaConfig } from './types';
-import { Home, Calendar as CalendarIcon, ClipboardList, Megaphone, User, Settings } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, ClipboardList, Megaphone, User } from 'lucide-react';
 import { PERSONAS } from './constants';
 
 const App: React.FC = () => {
+  // 检测是否为管理模式
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+
+  // 用户端状态
   const [currentPage, setCurrentPage] = useState('home');
   const [globalMood, setGlobalMood] = useState<MoodType>(MoodType.NEUTRAL);
 
@@ -22,6 +28,43 @@ const App: React.FC = () => {
   // State to hold message when switching from Journal Modal to Chat
   const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
 
+  // 初始化：检测 URL 参数和登录状态
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const modeParam = urlParams.get('mode');
+
+    if (modeParam === 'admin') {
+      setIsAdminMode(true);
+      // 检查是否已登录
+      const token = localStorage.getItem('famlee_admin_token');
+      if (token === 'authenticated') {
+        setIsAdminAuthenticated(true);
+      }
+    }
+  }, []);
+
+  // 管理员登录成功
+  const handleAdminLogin = () => {
+    setIsAdminAuthenticated(true);
+  };
+
+  // 管理员退出登录
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    // 重定向回用户端
+    window.location.href = window.location.origin;
+  };
+
+  // 如果是管理模式，渲染管理端
+  if (isAdminMode) {
+    return isAdminAuthenticated ? (
+      <AdminPage onLogout={handleAdminLogout} />
+    ) : (
+      <AdminLogin onLoginSuccess={handleAdminLogin} />
+    );
+  }
+
+  // 以下是用户端逻辑
   const handleAddEntry = (entry: JournalEntry) => {
     // 日记已保存到 Supabase，这里可以添加额外的处理逻辑（如通知）
     console.log('日记已保存:', entry);
@@ -53,7 +96,6 @@ const App: React.FC = () => {
       case 'campus': return <CampusPage />;
       case 'waterfall': return <WaterfallPage />;
       case 'profile': return <ProfilePage />;
-      case 'admin': return <AdminPage />;
       default: return <HomePage
                   setPage={setCurrentPage}
                   currentMood={globalMood}
@@ -82,19 +124,6 @@ const App: React.FC = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden text-gray-800">
       <FluidBackground mood={globalMood} />
-
-      {/* 管理入口按钮 */}
-      <button
-        onClick={() => setCurrentPage('admin')}
-        className={`fixed top-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
-          currentPage === 'admin'
-            ? 'bg-gray-800 text-white'
-            : 'bg-white/80 backdrop-blur-md text-gray-700 hover:bg-white border border-white/50'
-        }`}
-        title="后台管理"
-      >
-        <Settings size={20} strokeWidth={1.5} />
-      </button>
 
       {/* Main Content Area */}
       <main className="h-full w-full">

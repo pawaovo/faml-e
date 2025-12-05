@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Calendar, TrendingUp, Users } from 'lucide-react';
+import { BarChart3, Calendar, TrendingUp, Users, LogOut } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,11 @@ const MOOD_LABELS: Record<MoodType, string> = {
   [MoodType.NEUTRAL]: '平和',
 };
 
-export const AdminPage: React.FC = () => {
+interface AdminPageProps {
+  onLogout: () => void;
+}
+
+export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('statistics');
   const [timePeriod, setTimePeriod] = useState<'day' | 'week' | 'month'>('week');
   const [events, setEvents] = useState<MockCampusEvent[]>(mockCampusEvents);
@@ -88,15 +92,42 @@ export const AdminPage: React.FC = () => {
     alert('活动发布成功!');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('famlee_admin_token');
+    onLogout();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Top Navigation Bar */}
+      <nav className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">F</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Famlée 后台管理</h1>
+              <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm font-medium text-foreground">管理员</p>
+              <p className="text-xs text-muted-foreground">admin</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+              <LogOut className="w-4 h-4" />
+              退出登录
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Page Description */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Famlée 后台管理
-          </h1>
-          <p className="text-gray-600">数据统计与校园活动管理中心</p>
+          <p className="text-muted-foreground">数据统计与校园活动管理中心</p>
         </div>
 
         {/* Main Tabs */}
