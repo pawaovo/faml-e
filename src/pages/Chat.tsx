@@ -295,6 +295,7 @@ export const ChatPage: React.FC<ChatProps> = ({
   const createNewSession = () => {
     setSessionId(null);
     setPendingText('');
+    setIsStreaming(false);
     setMessages([{
       id: 'welcome',
       role: 'model',
