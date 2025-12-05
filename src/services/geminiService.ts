@@ -1,3 +1,5 @@
+import { getUserId } from '../lib/supabaseClient';
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
@@ -52,6 +54,7 @@ export const streamChat = async (
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${supabaseAnonKey}`,
+      "x-user-id": getUserId(),
     },
     body: JSON.stringify({
       message,
@@ -124,6 +127,7 @@ export const generateJournalSummary = async (entry: string): Promise<string> => 
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${supabaseAnonKey}`,
+        "x-user-id": getUserId(),
       },
       body: JSON.stringify({
         message: entry,

@@ -547,7 +547,7 @@ export const ChatPage: React.FC<ChatProps> = ({
           </div>
 
           {/* Session Dropdown */}
-          <div className="relative mt-4 z-50">
+          <div className="relative mt-4 z-[9999]">
             <button
               onClick={() => {
                 console.log('[菜单按钮] 点击，当前状态:', isSessionMenuOpen);
@@ -562,10 +562,14 @@ export const ChatPage: React.FC<ChatProps> = ({
 
             {/* Dropdown Menu */}
             {isSessionMenuOpen && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden animate-fade-in">
+              <div
+                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden animate-fade-in"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* New Session Button */}
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     console.log('[新建会话] 按钮点击');
                     createNewSession();
                   }}
@@ -583,7 +587,8 @@ export const ChatPage: React.FC<ChatProps> = ({
                     currentPersonaSessions.slice(0, 5).map(session => (
                       <button
                         key={session.id}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           console.log('[会话项] 点击会话:', session);
                           switchSession(session);
                         }}

@@ -7,8 +7,9 @@ import { CalendarPage } from './pages/Calendar';
 import { CampusPage } from './pages/Campus';
 import { WaterfallPage } from './pages/Waterfall';
 import { ProfilePage } from './pages/Profile';
+import { AdminPage } from './pages/Admin';
 import { MoodType, JournalEntry, PersonaConfig } from './types';
-import { Home, Calendar as CalendarIcon, ClipboardList, Megaphone, User } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, ClipboardList, Megaphone, User, Settings } from 'lucide-react';
 import { PERSONAS } from './constants';
 
 const App: React.FC = () => {
@@ -28,19 +29,19 @@ const App: React.FC = () => {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home': 
-        return <HomePage 
-                  setPage={setCurrentPage} 
-                  currentMood={globalMood} 
+      case 'home':
+        return <HomePage
+                  setPage={setCurrentPage}
+                  currentMood={globalMood}
                   setGlobalMood={setGlobalMood}
                   onSaveEntry={handleAddEntry}
                   setPendingChatMessage={setPendingChatMessage}
                   currentPersona={currentPersona}
                   setPersona={setCurrentPersona}
                />;
-      case 'chat': 
-        return <ChatPage 
-                  setGlobalMood={setGlobalMood} 
+      case 'chat':
+        return <ChatPage
+                  setGlobalMood={setGlobalMood}
                   initialMessage={pendingChatMessage}
                   clearInitialMessage={() => setPendingChatMessage(null)}
                   currentPersona={currentPersona}
@@ -52,9 +53,10 @@ const App: React.FC = () => {
       case 'campus': return <CampusPage />;
       case 'waterfall': return <WaterfallPage />;
       case 'profile': return <ProfilePage />;
-      default: return <HomePage 
-                  setPage={setCurrentPage} 
-                  currentMood={globalMood} 
+      case 'admin': return <AdminPage />;
+      default: return <HomePage
+                  setPage={setCurrentPage}
+                  currentMood={globalMood}
                   setGlobalMood={setGlobalMood}
                   onSaveEntry={handleAddEntry}
                   setPendingChatMessage={setPendingChatMessage}
@@ -80,7 +82,20 @@ const App: React.FC = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden text-gray-800">
       <FluidBackground mood={globalMood} />
-      
+
+      {/* 管理入口按钮 */}
+      <button
+        onClick={() => setCurrentPage('admin')}
+        className={`fixed top-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
+          currentPage === 'admin'
+            ? 'bg-gray-800 text-white'
+            : 'bg-white/80 backdrop-blur-md text-gray-700 hover:bg-white border border-white/50'
+        }`}
+        title="后台管理"
+      >
+        <Settings size={20} strokeWidth={1.5} />
+      </button>
+
       {/* Main Content Area */}
       <main className="h-full w-full">
         {renderPage()}
@@ -90,14 +105,14 @@ const App: React.FC = () => {
       <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel rounded-full pl-2 pr-2 py-2 flex items-center gap-1 shadow-xl z-40 border border-white/40">
         <NavButton id="calendar" icon={CalendarIcon} />
         <NavButton id="waterfall" icon={Megaphone} />
-        
+
         {/* Center Prominent Button for Home */}
-        <button 
+        <button
             onClick={() => setCurrentPage('home')}
             className={`
                 mx-2 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-md border border-white/20
-                ${currentPage === 'home' 
-                ? 'bg-gray-800 text-white scale-110 shadow-gray-500/30' 
+                ${currentPage === 'home'
+                ? 'bg-gray-800 text-white scale-110 shadow-gray-500/30'
                 : 'bg-white/50 text-gray-700 hover:bg-white/70'}
             `}
         >
