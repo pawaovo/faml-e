@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, AlertCircle, X, ChevronRight, ArrowRight, AudioLines, ChevronDown, Plus, MessageSquare } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { streamChat, StreamChunk } from '../services/geminiService';
 import { listChatSessions, fetchMessages } from '../services/supabaseService';
 import { ChatMessage, ChatMessageDB, ChatSession, MoodType, PersonaConfig } from '../types';
@@ -224,7 +225,7 @@ export const ChatPage: React.FC<ChatProps> = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, mode]);
+  }, [messages, mode, pendingText]);
 
   // Breathing Exercise Logic
   useEffect(() => {
@@ -284,6 +285,7 @@ export const ChatPage: React.FC<ChatProps> = ({
       }]);
       setIsSessionMenuOpen(false);
       setPendingText('');
+      setIsStreaming(false);
     } catch (err) {
       console.error('切换会话失败:', err);
     }
@@ -604,12 +606,14 @@ export const ChatPage: React.FC<ChatProps> = ({
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`
                                 max-w-[85%] p-4 rounded-2xl backdrop-blur-md text-sm font-light leading-relaxed tracking-wide shadow-sm
-                                ${msg.role === 'user' 
-                                    ? 'bg-white/30 text-gray-800 rounded-br-none border border-white/40' 
+                                ${msg.role === 'user'
+                                    ? 'bg-white/30 text-gray-800 rounded-br-none border border-white/40'
                                     : 'bg-white/60 text-gray-900 rounded-bl-none border border-white/60'}
                                 ${msg.isTools ? 'bg-indigo-50/50 border-indigo-100/50 text-indigo-800' : ''}
                             `}>
-                                {msg.text}
+                                <div className="prose prose-sm max-w-none [&_p]:mb-4 [&_p]:last:mb-0 prose-headings:mt-4 prose-headings:mb-2 [&_strong]:block [&_strong]:mt-4 [&_strong]:mb-1 [&_strong]:font-bold prose-ul:my-3 prose-ol:my-3 prose-li:my-0.5">
+                                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -617,7 +621,9 @@ export const ChatPage: React.FC<ChatProps> = ({
                     {isStreaming && pendingText && (
                         <div className="flex justify-start">
                             <div className="max-w-[85%] p-4 rounded-2xl rounded-bl-none backdrop-blur-md text-sm font-light leading-relaxed tracking-wide shadow-sm bg-white/60 text-gray-900 border border-white/60">
-                                {pendingText}
+                                <div className="prose prose-sm max-w-none [&_p]:mb-4 [&_p]:last:mb-0 prose-headings:mt-4 prose-headings:mb-2 [&_strong]:block [&_strong]:mt-4 [&_strong]:mb-1 [&_strong]:font-bold prose-ul:my-3 prose-ol:my-3 prose-li:my-0.5 inline">
+                                    <ReactMarkdown>{pendingText}</ReactMarkdown>
+                                </div>
                                 <span className="inline-block w-1.5 h-4 bg-gray-400 ml-1 animate-pulse"></span>
                             </div>
                         </div>
