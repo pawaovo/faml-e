@@ -141,6 +141,49 @@ Famlée 提供三种风格迥异的 AI 咨询师，满足不同用户的情感�
 - 用户设置
 - 数据统计
 
+### 🔐 后台管理系统 (Admin) ✅ 已实现
+
+**访问入口**: 在应用 URL 后添加 `?mode=admin` 参数
+- 本地开发: `http://localhost:3000?mode=admin`
+- 生产环境: `https://your-domain.com?mode=admin`
+
+**登录凭证**（演示环境）:
+- 账号：`admin`
+- 密码：`123456`
+
+**功能模块**:
+
+#### 📊 数据统计 Dashboard
+- **总对话次数**: 实时统计，显示增长趋势（+12.5%）
+- **情绪分布分析**:
+  - 开心情绪数量（显示周期变化）
+  - 焦虑情绪数量（用户留存率分析）
+  - 平和情绪占比（稳定性指标）
+- **时间维度切换**: 最近 7 天 / 30 天 / 3 个月
+- **可视化图表**: 开心/焦虑情绪对话量趋势（Area Chart）
+
+#### 📅 活动发布 Events
+- **发布校园心理活动**:
+  - 活动类型：讲座、团辅、工坊、运动
+  - 必填字段：标题、时间、地点
+  - 可选字段：描述、图片 URL
+- **已发布活动管理**:
+  - 活动列表展示（标题、类型徽章、时间、描述）
+  - 自动同步到 Campus 校园布告栏页面
+  - 活动预览卡片（带图片、类型标签）
+
+#### 📈 数据分析 Analytics（开发中）
+- 用户行为分析
+- 情绪趋势预测
+- 活动参与度统计
+
+**技术实现**:
+- **UI 组件**: shadcn/ui 企业级组件库（Card、Button、Badge、Input、Textarea、Select 等）
+- **图表库**: recharts（支持 AreaChart、PieChart、BarChart）
+- **数据来源**: Mock 数据（`src/data/mockAdminData.ts`）
+- **认证机制**: localStorage 存储 token (`famlee_admin_token`)
+- **退出登录**: 清除 token 并重定向回用户端首页
+
 ---
 
 ## 🚀 快速开始
@@ -212,12 +255,16 @@ famlée/
 │   │   ├── Calendar.tsx
 │   │   ├── Campus.tsx
 │   │   ├── Waterfall.tsx
-│   │   └── Profile.tsx
+│   │   ├── Profile.tsx
+│   │   ├── Admin.tsx           # Web 后台管理
+│   │   └── AdminLogin.tsx      # 管理员登录
 │   ├── lib/                   # 工具库
 │   │   └── supabaseClient.ts
-│   └── services/              # 服务层
-│       ├── geminiService.ts
-│       └── supabaseService.ts
+│   ├── services/              # 服务层
+│   │   ├── geminiService.ts
+│   │   └── supabaseService.ts
+│   └── data/                  # Mock 数据
+│       └── mockAdminData.ts    # 后台演示数据
 ├── supabase/
 │   ├── config.toml
 │   ├── migrations/
@@ -281,6 +328,7 @@ npm run supabase:deploy  # 部署 Edge Function
 - [x] Mood 日历与情绪分析
 - [x] 心情日记系统
 - [x] Edge Function 流式响应
+- [x] Web 后台管理系统（数据统计、活动发布、管理员认证）
 
 ### 🚧 开发中：语音对话功能
 

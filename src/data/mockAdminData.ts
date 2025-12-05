@@ -143,3 +143,130 @@ export const mockCampusEvents: MockCampusEvent[] = [
     createdAt: '2025-12-05',
   },
 ];
+
+// 数据分析接口定义
+export interface AnalyticsData {
+  // 使用时段分布（24小时）
+  hourlyActivity: {
+    hour: string;
+    users: number;
+  }[];
+
+  // 会话时长分布
+  sessionDuration: {
+    range: string;
+    count: number;
+    percentage: number;
+  }[];
+
+  // 人格偏好分布
+  personaPreference: {
+    persona: 'healing' | 'rational' | 'fun';
+    name: string;
+    count: number;
+    percentage: number;
+    color: string;
+  }[];
+
+  // 交互工具使用统计
+  toolUsage: {
+    tool: string;
+    count: number;
+    icon: string;
+  }[];
+
+  // 关键指标
+  keyMetrics: {
+    avgSessionMinutes: number;
+    returnRate: number;
+    moodImprovementRate: number;
+    totalJournals: number;
+  };
+
+  // 情绪转化分析
+  moodTransition: {
+    from: MoodType;
+    to: MoodType;
+    count: number;
+    rate: number;
+  }[];
+}
+
+// 生成数据分析 mock 数据
+export const generateAnalyticsData = (): AnalyticsData => {
+  // 使用时段分布（凌晨低谷、白天高峰）
+  const hourlyActivity = Array.from({ length: 24 }, (_, i) => {
+    let baseUsers = 30;
+    // 凌晨 0-6 时：低谷期
+    if (i >= 0 && i < 6) baseUsers = 5 + Math.floor(Math.random() * 10);
+    // 早晨 6-9 时：逐渐上升
+    else if (i >= 6 && i < 9) baseUsers = 20 + Math.floor(Math.random() * 15);
+    // 上午 9-12 时：第一波高峰
+    else if (i >= 9 && i < 12) baseUsers = 45 + Math.floor(Math.random() * 20);
+    // 午间 12-14 时：午休小高峰
+    else if (i >= 12 && i < 14) baseUsers = 55 + Math.floor(Math.random() * 25);
+    // 下午 14-18 时：平稳期
+    else if (i >= 14 && i < 18) baseUsers = 40 + Math.floor(Math.random() * 15);
+    // 晚间 18-23 时：最高峰（学生空闲时间）
+    else if (i >= 18 && i < 23) baseUsers = 60 + Math.floor(Math.random() * 30);
+    // 深夜 23-24 时：逐渐下降
+    else baseUsers = 25 + Math.floor(Math.random() * 15);
+
+    return {
+      hour: `${i}:00`,
+      users: baseUsers,
+    };
+  });
+
+  // 会话时长分布
+  const sessionDuration = [
+    { range: '<5分钟', count: 320, percentage: 18 },
+    { range: '5-15分钟', count: 890, percentage: 50 },
+    { range: '15-30分钟', count: 425, percentage: 24 },
+    { range: '>30分钟', count: 142, percentage: 8 },
+  ];
+
+  // 人格偏好分布
+  const personaPreference = [
+    { persona: 'healing' as const, name: '治愈系 (Melty)', count: 1024, percentage: 42, color: '#72e3ad' },
+    { persona: 'rational' as const, name: '理性系 (Logic)', count: 853, percentage: 35, color: '#6366F1' },
+    { persona: 'fun' as const, name: '趣味系 (Spark)', count: 561, percentage: 23, color: '#F59E0B' },
+  ];
+
+  // 交互工具使用统计
+  const toolUsage = [
+    { tool: 'MBTI 速测', count: 456, icon: '🧠' },
+    { tool: 'CBT 引导', count: 382, icon: '💭' },
+    { tool: '正念呼吸', count: 621, icon: '🌬️' },
+    { tool: '一键发疯', count: 234, icon: '🎉' },
+    { tool: '情绪接纳', count: 512, icon: '💚' },
+    { tool: '价值确认', count: 298, icon: '⭐' },
+  ];
+
+  // 关键指标
+  const keyMetrics = {
+    avgSessionMinutes: 14.2,
+    returnRate: 68.5,
+    moodImprovementRate: 73.8,
+    totalJournals: 1847,
+  };
+
+  // 情绪转化分析（从负面情绪转向正面/中性情绪）
+  const moodTransition = [
+    { from: MoodType.ANXIOUS, to: MoodType.NEUTRAL, count: 245, rate: 42.3 },
+    { from: MoodType.ANXIOUS, to: MoodType.HAPPY, count: 156, rate: 26.9 },
+    { from: MoodType.SAD, to: MoodType.NEUTRAL, count: 187, rate: 51.2 },
+    { from: MoodType.SAD, to: MoodType.HAPPY, count: 98, rate: 26.8 },
+    { from: MoodType.ANGRY, to: MoodType.NEUTRAL, count: 67, rate: 54.5 },
+    { from: MoodType.ANGRY, to: MoodType.HAPPY, count: 34, rate: 27.6 },
+  ];
+
+  return {
+    hourlyActivity,
+    sessionDuration,
+    personaPreference,
+    toolUsage,
+    keyMetrics,
+    moodTransition,
+  };
+};

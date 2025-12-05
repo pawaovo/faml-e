@@ -66,7 +66,9 @@ D:\ai\famlée\
 │   │   ├── Campus.tsx         # 校园心理活动布告栏
 │   │   ├── Waterfall.tsx      # 心语瀑布：匿名吐槽墙
 │   │   ├── Journal.tsx        # 日记详情页
-│   │   └── Profile.tsx        # 个人中心
+│   │   ├── Profile.tsx        # 个人中心
+│   │   ├── Admin.tsx          # Web 后台管理页面
+│   │   └── AdminLogin.tsx     # 管理员登录页面
 │   ├── lib/
 │   │   └── supabaseClient.ts  # Supabase 客户端 & 用户ID管理
 │   └── services/
@@ -106,7 +108,7 @@ chat_messages (id, session_id, role, content, mood_detected, created_at)
 
 | 文件 | 职责 |
 |------|------|
-| `src/App.tsx` | 应用外壳、导航、全局状态管理 |
+| `src/App.tsx` | 应用外壳、导航、全局状态管理、Admin 模式路由 |
 | `src/services/geminiService.ts` | Edge Function 流式聊天调用、SSE 解析 |
 | `src/services/supabaseService.ts` | 日记 CRUD、聊天会话管理 |
 | `src/lib/supabaseClient.ts` | Supabase 客户端初始化、固定用户ID |
@@ -115,6 +117,8 @@ chat_messages (id, session_id, role, content, mood_detected, created_at)
 | `src/pages/Chat.tsx` | AI 聊天界面（流式文字、会话切换、交互工具） |
 | `src/pages/Calendar.tsx` | Mood 日历，从 Supabase 加载日记数据 |
 | `src/pages/Home.tsx` | 首页，心情选择与日记创建入口 |
+| `src/pages/Admin.tsx` | Web 后台管理页面（数据统计、活动发布、数据分析） |
+| `src/pages/AdminLogin.tsx` | 管理员登录页面（演示账号：admin/123456） |
 | `src/components/JournalModal.tsx` | 日记创建弹窗，支持图片/音频上传 |
 | `supabase/functions/gemini-chat/index.ts` | Edge Function，流式 AI 聊天、会话管理、消息持久化 |
 
@@ -144,6 +148,57 @@ chat_messages (id, session_id, role, content, mood_detected, created_at)
 - `ANXIOUS`: 深蓝 + 灰蓝
 - `SAD`: 薰衣草 + 灰色
 - `ANGRY`: 红色 + 黄色
+
+### Admin Backend Management System
+
+**访问方式**: 在应用 URL 后添加 `?mode=admin` 参数（例如：`http://localhost:3000?mode=admin`）
+
+**登录凭证**（演示环境）:
+- 账号：`admin`
+- 密码：`123456`
+
+**功能模块**:
+
+1. **数据统计 Dashboard**
+   - 总对话次数统计（显示增长趋势）
+   - 各情绪分布可视化（开心、焦虑、平和、难过、愤怒）
+   - 时间维度切换：最近 7 天 / 30 天 / 3 个月
+   - 趋势图表：开心/焦虑情绪对话量趋势（Area Chart）
+
+2. **活动发布 Events**
+   - 发布校园心理活动（讲座、团辅、工坊、运动）
+   - 活动字段：标题、时间、类型、地点、描述、图片 URL
+   - 已发布活动列表（显示在 Campus 校园布告栏页面）
+   - 活动预览卡片（标题、类型徽章、时间、描述）
+
+3. **数据分析 Analytics**
+   - 正在开发中（占位界面）
+
+**技术实现**:
+- UI 组件：shadcn/ui (Card, Button, Badge, Input, Textarea, Select 等)
+- 图表库：recharts (AreaChart, PieChart, BarChart)
+- Mock 数据：`src/data/mockAdminData.ts` 提供演示数据
+- 认证机制：localStorage 存储 token (`famlee_admin_token`)
+- 退出登录：清除 token 并重定向回用户端
+
+**路由逻辑** (`App.tsx`):
+```tsx
+// 检测 URL 参数
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('mode') === 'admin') {
+  // 检查登录状态
+  const token = localStorage.getItem('famlee_admin_token');
+  // 未登录 → 显示 AdminLogin
+  // 已登录 → 显示 AdminPage
+}
+```
+
+**后续优化方向**:
+- [ ] 连接真实 Supabase 数据（替代 mock 数据）
+- [ ] 添加更多图表类型（饼图、柱状图）
+- [ ] 实现用户管理、权限控制
+- [ ] 活动编辑/删除功能
+- [ ] 数据导出功能（CSV/JSON）
 
 ## Code Patterns
 
@@ -208,6 +263,14 @@ chat_messages (id, session_id, role, content, mood_detected, created_at)
 - [x] 修复 header 名称不一致
 - [x] 移除废弃函数
 - [x] 简化冗余逻辑
+
+### 阶段 6：UI 细节优化 (Window 5)
+- [x] 移除聊天页面"消息"按钮的上下箭头符号，仅保留图标
+- [x] 会话下拉菜单中"新建对话"按钮居中对齐
+- [x] 简化为 "+" 图标（size 20），删除文字标签
+- [x] Profile 页面新增"NFC 设置"选项（紫色主题，与其他设置保持一致）
+- [x] 优化底部导航栏：增加横向长度、按钮尺寸、间距
+- [x] 完善 Admin 后台管理系统文档
 
 ## Pending Tasks (Window 5)
 

@@ -20,8 +20,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
-import { generateMockStats, mockCampusEvents, type MockCampusEvent } from '@/data/mockAdminData';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { generateMockStats, mockCampusEvents, generateAnalyticsData, type MockCampusEvent } from '@/data/mockAdminData';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { MoodType } from '../types';
 
 // Mood 颜色映射
@@ -52,6 +52,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
   });
 
   const stats = generateMockStats(timePeriod);
+  const analyticsData = generateAnalyticsData();
 
   const handlePublishEvent = () => {
     if (!newEvent.title || !newEvent.date || !newEvent.location) {
@@ -503,8 +504,279 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
           </div>
         )}
 
+        {/* Analytics View */}
+        {activeView === 'analytics' && (
+          <div className="p-8">
+            {/* Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-1">数据分析</h2>
+              <p className="text-muted-foreground">深度洞察用户行为与心理健康趋势</p>
+            </div>
+
+            {/* 关键指标卡片 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-sm font-medium">平均会话时长</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {analyticsData.keyMetrics.avgSessionMinutes} <span className="text-lg text-muted-foreground">分钟</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">用户平均对话时长</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-sm font-medium">用户回访率</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {analyticsData.keyMetrics.returnRate}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">7 天内再次访问比例</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-sm font-medium">情绪改善率</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary mb-1">
+                    {analyticsData.keyMetrics.moodImprovementRate}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">负面→正面/中性转化率</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-sm font-medium">日记总数</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground mb-1">
+                    {analyticsData.keyMetrics.totalJournals.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-muted-foreground">累计创建日记数</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 使用时段分布 + 人格偏好 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              {/* 使用时段热力图 */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-xl">使用时段分布</CardTitle>
+                  <CardDescription>24 小时活跃用户数（单位：人）</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={analyticsData.hourlyActivity}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="hour"
+                        stroke="#9ca3af"
+                        fontSize={11}
+                        tickLine={false}
+                      />
+                      <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        }}
+                      />
+                      <Bar dataKey="users" fill="#72e3ad" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    📊 <strong>洞察</strong>：晚间 18-23 时为使用高峰，凌晨 0-6 时活跃度最低。建议在高峰时段加强客服支持。
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 人格偏好分布饼图 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">人格偏好分布</CardTitle>
+                  <CardDescription>三种治疗人格使用占比</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.personaPreference}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percentage }) => `${percentage}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="percentage"
+                      >
+                        {analyticsData.personaPreference.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-2 mt-4">
+                    {analyticsData.personaPreference.map((persona) => (
+                      <div key={persona.persona} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: persona.color }}
+                          />
+                          <span className="text-muted-foreground">{persona.name}</span>
+                        </div>
+                        <span className="font-medium">{persona.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 会话时长分布 + 工具使用统计 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* 会话时长分布 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">会话时长分布</CardTitle>
+                  <CardDescription>用户单次对话时长区间统计</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={analyticsData.sessionDuration} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis type="number" stroke="#9ca3af" fontSize={12} />
+                      <YAxis dataKey="range" type="category" stroke="#9ca3af" fontSize={12} width={80} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Bar dataKey="count" fill="#6366F1" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    💡 <strong>发现</strong>：50% 的会话在 5-15 分钟内完成，说明用户倾向简短高效的对话。
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 工具使用统计 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">交互工具使用统计</CardTitle>
+                  <CardDescription>各功能工具累计使用次数</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={analyticsData.toolUsage} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis type="number" stroke="#9ca3af" fontSize={12} />
+                      <YAxis dataKey="tool" type="category" stroke="#9ca3af" fontSize={12} width={90} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Bar dataKey="count" fill="#F59E0B" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    🌟 <strong>亮点</strong>：正念呼吸工具最受欢迎（621次），情绪接纳紧随其后（512次）。
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 情绪转化分析 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">情绪转化分析</CardTitle>
+                <CardDescription>负面情绪向正面/中性情绪的转化率</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {analyticsData.moodTransition.map((transition, index) => {
+                    const fromColor = MOOD_COLORS[transition.from];
+                    const toColor = MOOD_COLORS[transition.to];
+                    const fromName = {
+                      [MoodType.ANXIOUS]: '焦虑',
+                      [MoodType.SAD]: '难过',
+                      [MoodType.ANGRY]: '愤怒',
+                      [MoodType.HAPPY]: '开心',
+                      [MoodType.NEUTRAL]: '平和',
+                    }[transition.from];
+                    const toName = {
+                      [MoodType.ANXIOUS]: '焦虑',
+                      [MoodType.SAD]: '难过',
+                      [MoodType.ANGRY]: '愤怒',
+                      [MoodType.HAPPY]: '开心',
+                      [MoodType.NEUTRAL]: '平和',
+                    }[transition.to];
+
+                    return (
+                      <div
+                        key={index}
+                        className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: fromColor }}
+                          />
+                          <span className="text-sm font-medium">{fromName}</span>
+                          <span className="text-muted-foreground">→</span>
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: toColor }}
+                          />
+                          <span className="text-sm font-medium">{toName}</span>
+                        </div>
+                        <div className="flex items-end justify-between">
+                          <div>
+                            <p className="text-2xl font-bold text-foreground">{transition.rate}%</p>
+                            <p className="text-xs text-muted-foreground">{transition.count} 次转化</p>
+                          </div>
+                          <Badge variant="success" className="text-xs">有效</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <p className="text-sm text-foreground">
+                    <strong>✨ 总结</strong>：平均情绪改善率达 <strong className="text-primary">{analyticsData.keyMetrics.moodImprovementRate}%</strong>，
+                    说明 AI 心理支持系统有效帮助用户缓解负面情绪。焦虑→平和的转化率最高（42.3%），建议针对性优化焦虑情绪应对策略。
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Placeholder for other views */}
-        {!['dashboard', 'events'].includes(activeView) && (
+        {!['dashboard', 'events', 'analytics'].includes(activeView) && (
           <div className="p-8">
             <Card className="p-12 text-center">
               <CardTitle className="text-2xl mb-2">功能开发中</CardTitle>

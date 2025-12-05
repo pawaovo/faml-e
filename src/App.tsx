@@ -109,15 +109,15 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ id, icon: Icon }: { id: string, icon: any }) => (
-    <button 
+    <button
         onClick={() => setCurrentPage(id)}
-        className={`p-3 rounded-full transition-all duration-300 ${
-            currentPage === id 
-            ? 'bg-gray-800 text-white shadow-lg' 
+        className={`p-4 rounded-full transition-all duration-300 ${
+            currentPage === id
+            ? 'bg-gray-800 text-white shadow-lg'
             : 'text-gray-500 hover:bg-white/30'
         }`}
     >
-        <Icon size={20} strokeWidth={1.5} />
+        <Icon size={22} strokeWidth={1.5} />
     </button>
   );
 
@@ -131,7 +131,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel rounded-full pl-2 pr-2 py-2 flex items-center gap-1 shadow-xl z-40 border border-white/40">
+      <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel rounded-full pl-3 pr-3 py-2.5 flex items-center gap-2 shadow-xl z-40 border border-white/40">
         <NavButton id="calendar" icon={CalendarIcon} />
         <NavButton id="waterfall" icon={Megaphone} />
 
@@ -139,13 +139,13 @@ const App: React.FC = () => {
         <button
             onClick={() => setCurrentPage('home')}
             className={`
-                mx-2 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-md border border-white/20
+                mx-3 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-md border border-white/20
                 ${currentPage === 'home'
                 ? 'bg-gray-800 text-white scale-110 shadow-gray-500/30'
                 : 'bg-white/50 text-gray-700 hover:bg-white/70'}
             `}
         >
-            <Home size={24} strokeWidth={1.5} />
+            <Home size={26} strokeWidth={1.5} />
         </button>
 
         <NavButton id="campus" icon={ClipboardList} />

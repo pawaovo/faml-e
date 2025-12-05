@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings, Shield, Activity, ChevronRight, LogOut, Moon } from 'lucide-react';
+import { Settings, Shield, Activity, ChevronRight, LogOut, Moon, Nfc } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   return (
@@ -34,6 +34,13 @@ export const ProfilePage: React.FC = () => {
                  <Shield size={18} />
              </div>
              <span className="flex-1 text-left text-sm font-medium text-gray-800">隐私边界</span>
+             <ChevronRight size={16} className="text-gray-400" />
+         </button>
+         <button className="w-full flex items-center gap-3 p-4 hover:bg-white/30 transition-colors border-b border-gray-100/50">
+             <div className="p-1.5 bg-purple-100 text-purple-600 rounded-lg">
+                 <Nfc size={18} />
+             </div>
+             <span className="flex-1 text-left text-sm font-medium text-gray-800">NFC 设置</span>
              <ChevronRight size={16} className="text-gray-400" />
          </button>
          <button className="w-full flex items-center gap-3 p-4 hover:bg-white/30 transition-colors">
