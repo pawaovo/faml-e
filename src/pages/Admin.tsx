@@ -83,8 +83,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
   // 侧边栏菜单项
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: '数据统计' },
-    { id: 'events', icon: Calendar, label: '活动发布' },
     { id: 'analytics', icon: BarChart3, label: '数据分析' },
+    { id: 'events', icon: Calendar, label: '活动发布' },
   ];
 
   return (
