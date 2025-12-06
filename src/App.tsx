@@ -28,6 +28,9 @@ const App: React.FC = () => {
   // State to hold message when switching from Journal Modal to Chat
   const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
 
+  // Bottom navigation visibility state
+  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
+
   // 初始化：检测 URL 参数和登录状态
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -88,6 +91,7 @@ const App: React.FC = () => {
                   initialMessage={pendingChatMessage}
                   clearInitialMessage={() => setPendingChatMessage(null)}
                   currentPersona={currentPersona}
+                  setBottomNavVisible={setIsBottomNavVisible}
                />;
       case 'calendar':
         return <CalendarPage
@@ -131,7 +135,9 @@ const App: React.FC = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel rounded-full pl-3 pr-3 py-2.5 flex items-center gap-2 shadow-xl z-40 border border-white/40">
+      <nav className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel rounded-full pl-3 pr-3 py-2.5 flex items-center gap-2 shadow-xl z-40 border border-white/40 transition-all duration-300 ${
+        isBottomNavVisible ? 'translate-y-0 opacity-100' : 'translate-y-32 opacity-0'
+      }`}>
         <NavButton id="calendar" icon={CalendarIcon} />
         <NavButton id="waterfall" icon={Megaphone} />
 

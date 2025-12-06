@@ -5,12 +5,14 @@ import ReactMarkdown from 'react-markdown';
 import { streamChat, StreamChunk } from '../services/geminiService';
 import { listChatSessions, fetchMessages } from '../services/supabaseService';
 import { ChatMessage, ChatMessageDB, ChatSession, MoodType, PersonaConfig } from '../types';
+import { AnalysisModal } from '../components/AnalysisModal';
 
 interface ChatProps {
   setGlobalMood: (mood: MoodType) => void;
   initialMessage?: string | null;
   clearInitialMessage?: () => void;
   currentPersona: PersonaConfig;
+  setBottomNavVisible: (visible: boolean) => void;
 }
 
 type ChatMode = 'text' | 'voice';
@@ -91,7 +93,8 @@ export const ChatPage: React.FC<ChatProps> = ({
   setGlobalMood,
   initialMessage,
   clearInitialMessage,
-  currentPersona
+  currentPersona,
+  setBottomNavVisible
 }) => {
   const [mode, setMode] = useState<ChatMode>('text');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -121,6 +124,10 @@ export const ChatPage: React.FC<ChatProps> = ({
   const [isCBTModalOpen, setIsCBTModalOpen] = useState(false);
   const [cbtStep, setCbtStep] = useState(0);
   const [cbtData, setCbtData] = useState({ event: '', thought: '', evidence: '', reframe: '' });
+
+  // Analysis Modal State
+  const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);
+  const [isAvatarClicked, setIsAvatarClicked] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasSentInitialRef = useRef(false);
@@ -469,6 +476,20 @@ export const ChatPage: React.FC<ChatProps> = ({
     }
   };
 
+  // 处理角色图标点击
+  const handleAvatarClick = () => {
+    setIsAvatarClicked(true);
+    setTimeout(() => setIsAvatarClicked(false), 200);
+    setIsAnalysisModalOpen(true);
+    setBottomNavVisible(false); // 隐藏底部导航栏
+  };
+
+  // 关闭分析弹窗
+  const handleCloseAnalysisModal = () => {
+    setIsAnalysisModalOpen(false);
+    setBottomNavVisible(true); // 恢复底部导航栏
+  };
+
   // 获取当前 Persona 的会话列表
   const currentPersonaSessions = sessions.filter(s => s.persona === currentPersona.id);
 
@@ -479,11 +500,18 @@ export const ChatPage: React.FC<ChatProps> = ({
       <div className="flex flex-col items-center mb-4 z-[10001] shrink-0">
           <div className="relative w-24 h-24">
               <div className="absolute inset-0 bg-yellow-200/50 rounded-full blur-xl animate-pulse"></div>
-              <img
-                  src={currentPersona.image}
-                  alt={currentPersona.title}
-                  className="w-full h-full object-cover rounded-full border-4 border-white/50 relative z-10 drop-shadow-xl"
-              />
+              <button
+                  onClick={handleAvatarClick}
+                  className={`w-full h-full object-cover rounded-full border-4 border-white/50 relative z-10 drop-shadow-xl cursor-pointer transition-transform duration-200 ${
+                    isAvatarClicked ? 'scale-90' : 'hover:scale-105'
+                  }`}
+              >
+                <img
+                    src={currentPersona.image}
+                    alt={currentPersona.title}
+                    className="w-full h-full object-cover rounded-full"
+                />
+              </button>
                {/* Small Persona Label Badge */}
               <div className="absolute -bottom-2.5 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap">
                   <span className="text-[10px] font-bold text-gray-600 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/60 shadow-sm">
@@ -811,7 +839,7 @@ export const ChatPage: React.FC<ChatProps> = ({
       {isBreathingModalOpen && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-blue-50/30 backdrop-blur-xl animate-fade-in">
               <div className="w-full max-w-sm flex flex-col items-center justify-center relative">
-                   <button 
+                   <button
                       onClick={() => setIsBreathingModalOpen(false)}
                       className="absolute top-[-60px] right-0 p-2 text-gray-500 hover:bg-white/40 rounded-full backdrop-blur-md border border-white/30"
                   >
@@ -819,7 +847,7 @@ export const ChatPage: React.FC<ChatProps> = ({
                   </button>
 
                   <h3 className="text-2xl font-thin text-gray-800 mb-12 tracking-widest uppercase">正念呼吸</h3>
-                  
+
                   {/* Visual Breathing Circle */}
                   <div className="relative w-64 h-64 flex items-center justify-center">
                       {/* Outer Glow */}
@@ -827,7 +855,7 @@ export const ChatPage: React.FC<ChatProps> = ({
                           absolute inset-0 rounded-full bg-blue-200/30 blur-2xl transition-all duration-[4000ms] ease-in-out
                           ${breathingPhase === 'inhale' ? 'scale-125 opacity-100' : breathingPhase === 'hold' ? 'scale-125 opacity-80' : 'scale-75 opacity-40'}
                       `}></div>
-                      
+
                       {/* Main Circle */}
                       <div className={`
                           w-48 h-48 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 shadow-xl border-4 border-white/60 flex items-center justify-center
@@ -847,6 +875,13 @@ export const ChatPage: React.FC<ChatProps> = ({
               </div>
           </div>
       )}
+
+      {/* AI Analysis Modal */}
+      <AnalysisModal
+        isOpen={isAnalysisModalOpen}
+        onClose={handleCloseAnalysisModal}
+        personaName={currentPersona.title}
+      />
 
       <style>{`
         @keyframes ping-slow {
